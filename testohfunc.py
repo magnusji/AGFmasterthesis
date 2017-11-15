@@ -44,12 +44,21 @@ x1415,y1415 = a.sort_oh(OH_data1415)
 x1516,y1516 = a.sort_oh(OH_data1516)
 
 
-#susyx_x, susyx,susyy = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
+susyx_x, susyx,susyy, susyy_b = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
 
+print(len(susyy_b))
+sigma_yyb = susyy - susyy_b
+mp.figure()
+mp.plot(susyx, susyy, 'bo', susyx, susyy_b,'r+')
 
-number_n = 4500  #The number in line with Suzy distributions between 0 and 5313 (-1)
+mp.figure()
+mp.plot(susyx, sigma_yyb, 'bo')
+mp.show()
+
+'''
+number_n = 523  #The number in line with Suzy distributions between 0 and 5313 (-1)
 Sdata = Susydat[number_n][1:]
-x,y_fit = b.gaussian(Sdata)
+x,y_fit = b.gaussian(Sdata, 1, number_n)
 
 mp.figure()
 mp.plot(Susydat[number_n][1:], x, 'bo--', label='data')
@@ -59,6 +68,7 @@ mp.ylabel('Height in km')
 mp.legend()
 mp.show()
 
+'''
 '''
 N = len(Susydat[number_n][1:])
 print Susydat[number_n][1:]

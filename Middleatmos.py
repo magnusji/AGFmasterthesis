@@ -32,7 +32,7 @@ class Middleatmos:
         '''
         return a*exp(-((x-x0)**2.)/(2.0*sigma**2.))
 
-    def gaussian(self,Sdata): #input data for a distribution Susydat[i][1:]
+    def gaussian(self,Sdata, Datefit, i): #input data for a distribution Susydat[i][1:]
         '''
         Fitting the data points to the gaussian function gaus
         Input Sdata is the distribution of the column,
@@ -49,7 +49,9 @@ class Middleatmos:
                 y_fit = ar(self.gaus(x,*popt))
             except RuntimeError:
                 print("Error - curve_fit failed")
+                print('date = %i, number in line i = %i'%(Datefit, i))
                 y_fit = zeros(N)
+
         else:
             y_fit = zeros(N)
         return x,y_fit #returns x as height and y_fit as the fitted number of occurances
@@ -58,6 +60,11 @@ class Middleatmos:
     def sort_suzy(self, Suzy_data):
         '''
         Sorting the maximum # of meteor burnouts for height
+        returns
+            susyx_x: raw date yyyymmdd
+            susyx: datetime format of the datetime
+            susyy: the maximum height of the fitted curve
+            susyy_b: The raw height maximum number of occurances (without fit)
         '''
         Susydat = Suzy_data
         susyx = []
@@ -65,15 +72,17 @@ class Middleatmos:
 
         susyx_x = zeros(len(Susydat))
         susyy = zeros(len(Susydat))
+        susyy_b = zeros(len(Susydat))
         for i in range(len(Susydat)):
             dtt = int(Susydat[i][0])
             susyx_x[i] = dtt
             dt = str(dtt)
             susyx.append(datetime.datetime.strptime(dt,'%Y%m%d'))
             Sdata = Susydat[i][1:]
-            x,y_fit= self.gaussian(Sdata)
+            x,y_fit= self.gaussian(Sdata, dtt, i)
             susyy[i] = x[y_fit.argmax()]
-
+            x = ar(linspace(70.0,100.0,len(Sdata)))
+            susyy_b[i] = x[Sdata.argmax()]
             '''
             for j in range(len(Susydat[i][1:])):
                 if Susydat[i][j+1] > testx:
@@ -81,4 +90,4 @@ class Middleatmos:
                     x = j+1
                 susyy[i] = x + 70  #susyy is from the height 70-100 km so need to add 69 in order to convert
             '''
-        return susyx_x, susyx, susyy
+        return susyx_x, susyx, susyy, susyy_b
