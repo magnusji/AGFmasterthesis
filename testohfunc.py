@@ -58,7 +58,9 @@ mp.show()
 '''
 number_n = 523  #The number in line with Suzy distributions between 0 and 5313 (-1)
 Sdata = Susydat[number_n][1:]
-x,y_fit = b.gaussian(Sdata, 1, number_n)
+N = len(Sdata)
+x = linspace(70,100,N)
+x,y_fit = b.gaussian(Sdata, 1, number_n, N, x)
 
 mp.figure()
 mp.plot(Susydat[number_n][1:], x, 'bo--', label='data')

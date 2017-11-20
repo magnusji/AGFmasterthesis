@@ -102,8 +102,8 @@ class Read_four_lines():
                 withininx.append(indexcounter)
                 within.append(date)
             indexcounter += 1
-        print withininx
-        print len(within)
+        print(withininx)
+        print(len(within))
         seasonalsuzy = suzydata[withininx]
 
         return within, seasonalsuzy

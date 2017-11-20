@@ -42,7 +42,7 @@ def test_gtd7():
     flags.switches[0] = 0
     for i in range(1, 24):
         flags.switches[i]=1
-        
+
     for i in range(17):
         Input[i].doy=172;
         Input[i].year=0; #/* without effect */
@@ -54,7 +54,7 @@ def test_gtd7():
         Input[i].f107A=150;
         Input[i].f107=150;
         Input[i].ap=4;
-	
+
     Input[1].doy=81;
     Input[2].sec=75000;
     Input[2].alt=1000;
@@ -122,7 +122,7 @@ def test_gtd7():
             print("         %3.0f" % Input[i*5+j].f107, end='')
 
         print('\n\n', end='')
-        
+
         print("\nTINF  ", end='')
         for j in range(5):
             print("     %7.2f" % output[i*5+j].t[0], end='')

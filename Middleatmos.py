@@ -32,14 +32,20 @@ class Middleatmos:
         '''
         return a*exp(-((x-x0)**2.)/(2.0*sigma**2.))
 
-    def gaussian(self,Sdata, Datefit, i): #input data for a distribution Susydat[i][1:]
+    def gaussian(self,Sdata, Datefit, i, N, x): #input data for a distribution Susydat[i][1:]
         '''
         Fitting the data points to the gaussian function gaus
         Input Sdata is the distribution of the column,
         given by the suzy radar data.
+        Takes Sdata, Datefit,i,N,x
+        Sdata: is the distribution data from the suzy radar
+        Datefit: The date from which the data is taken
+        i: the iteration number, how far along the line of the dateset it is,
+        N: Length of data sting sent in to the function
+        x: vector giving the height distribution of Sdata
+        These should be computed outside to prevent mismatch
         '''
-        N = len(Sdata)
-        x = ar(linspace(70.0,100.0,N)) #defining the height
+         #defining the height
         y = ar(Sdata) #making sure the data set is an array
         if sum(y)>=1.0:
             mean = sum(x*y)/sum(y) #finding the average value (center of the curve)
@@ -79,9 +85,11 @@ class Middleatmos:
             dt = str(dtt)
             susyx.append(datetime.datetime.strptime(dt,'%Y%m%d'))
             Sdata = Susydat[i][1:]
-            x,y_fit= self.gaussian(Sdata, dtt, i)
+            N = len(Sdata)
+            x = ar(linspace(70.0,100.0,N))
+            x,y_fit= self.gaussian(Sdata, dtt, i,N, x)
             susyy[i] = x[y_fit.argmax()]
-            x = ar(linspace(70.0,100.0,len(Sdata)))
+
             susyy_b[i] = x[Sdata.argmax()]
             '''
             for j in range(len(Susydat[i][1:])):
