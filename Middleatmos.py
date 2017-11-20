@@ -7,6 +7,11 @@ from scipy.optimize import curve_fit
 class Middleatmos:
 
     def readoh(self,filename):
+        '''
+        This function reads OH data from file to a matrix OH_data
+        needs input filename of OH data
+        '''
+
         self.filename = filename
 
         infile = open(self.filename, 'r')
@@ -30,7 +35,7 @@ class Middleatmos:
         x0 is the mean position of the bell curve_fit,
         sigma^2 is the variance to the function
         '''
-        return a*exp(-((x-x0)**2.)/(2.0*sigma**2.))
+        return a*exp(-((x-x0)**2.0)/(2.0*sigma**2.))
 
     def gaussian(self,Sdata, Datefit, i, N, x): #input data for a distribution Susydat[i][1:]
         '''
@@ -48,7 +53,7 @@ class Middleatmos:
          #defining the height
         y = ar(Sdata) #making sure the data set is an array
         if sum(y)>=1.0:
-            mean = sum(x*y)/sum(y) #finding the average value (center of the curve)
+            mean = float(sum(x*y)/sum(y)) #finding the average value (center of the curve)
             sigma = sqrt(sum((y*(x-mean)**2.)/sum(y))) #variance for the gauss function
             try:
                 popt,pcov = curve_fit(self.gaus,x,y,p0=[1,mean,sigma], maxfev=2000)
