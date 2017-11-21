@@ -46,7 +46,7 @@ x1516,y1516 = a.sort_oh(OH_data1516)
 
 susyx_x, susyx,susyy, susyy_b, tempyy = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
 
-print(len(susyy_b))
+#print(len(susyy_b))
 sigma_yyb = susyy - susyy_b
 mp.figure()
 mp.plot(susyx, susyy, 'bo', susyx, susyy_b,'r+')
@@ -69,7 +69,17 @@ fig.autofmt_xdate()
 lns = lns1 +lns2
 labs = [l.get_label() for l in lns]
 ax1.legend(lns,labs,loc=0)
-mp.show()
+
+
+
+xx = x1213
+yy = y1213
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
 
 '''
 number_n = 523  #The number in line with Suzy distributions between 0 and 5313 (-1)
@@ -246,5 +256,6 @@ ax2.plot(x1314,y1314, 'go')
 ax1.set_ylabel('[Km] Height of maximum meteor burnout')
 ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
 ax1.set_xlabel('Time')
-mp.show()
 '''
+
+mp.show()

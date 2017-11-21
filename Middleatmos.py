@@ -60,13 +60,16 @@ class Middleatmos:
         if sum(y)>=1.0:
             mean = float(sum(x*y)/sum(y)) #finding the average value (center of the curve)
             sigma = sqrt(sum((y*(x-mean)**2.)/sum(y))) #variance for the gauss function
-            try:
-                popt,pcov = curve_fit(self.gaus,x,y,p0=[1,mean,sigma], maxfev=2000)
-                y_fit = ar(self.gaus(x,*popt))
-            except RuntimeError:
-                print("Error - curve_fit failed")
-                print('date = %i, number in line i = %i'%(Datefit, i))
+            if sigma == 0:
+                print('Error no fit to function, date = %i, number in line i = %i' %(Datefit, i))
                 y_fit = zeros(N)
+            else:
+                try:
+                    popt,pcov = curve_fit(self.gaus,x,y,p0=[1,mean,sigma], maxfev=1000)
+                    y_fit = ar(self.gaus(x,*popt))
+                except RuntimeError:
+                    print('Error - curve_fit failed, date = %i, number in line i = %i'%(Datefit, i))
+                    y_fit = zeros(N)
 
         else:
             y_fit = zeros(N)
@@ -98,11 +101,7 @@ class Middleatmos:
             susyx.append(datetime.datetime.strptime(dt,'%Y%m%d'))
             d2tt = datetime.datetime.strptime(dt,'%Y%m%d')
             d2t = int(datetime.date.strftime(d2tt,'%j'))
-            #print(type(d2t))
-            #print(d2t)
-            #d2tt = d2t.timetuple()
-            #d2tt2doy = d2tt.tm_yday()
-            #susy_dofy[i] = d2tt2doy
+
             Sdata = Susydat[i][1:]
             N = len(Sdata)
             x = ar(linspace(70.0,100.0,N))
@@ -216,10 +215,15 @@ class Middleatmos:
         Susyx: the time series from Suzydata,
         oh_time: OH seasonal timeseries
 
+        returns
+        Seasonal dates as datetime objects
+        Seasonal indicies
+        Seasonal data for input Suzy_data
+
         '''
         susy_time = susyx
         suzydata = Suzy_data
-        oh_data = OH_data
+
         oh_time = oh_time
         within = []
         withininx = []
@@ -229,15 +233,37 @@ class Middleatmos:
                 withininx.append(indexcounter)
                 within.append(date)
             indexcounter += 1
-        print(withininx)
-        print(len(within))
+        #print(withininx)
+        #print(len(within))
         if suzydata == 'NO':
             return within,withininx
         else:
             seasonalsuzy = suzydata[withininx]
             return within,withininx, seasonalsuzy
 
-    def seasonsplot(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
+    def seasonsplot_temperature(self,seasonaldates,seasonalsuzy,seasonaltemperature,OH_dates,OH_temperature):
+
+
+        ax1 = mp.subplot(211)
+        ax2 = ax1.twinx()
+        l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='suzy')
+
+        l2 =ax2.plot(OH_dates, OH_temperature,'bo--', label='OH')
+
+        ax1.set_ylabel('[$^o$K] Temperature at maximum meteor burnout')
+        #ax1.set_ylim(210,235)
+        ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
+        #ax2.set_ylim(170,250)
+        lns = l1 +l2
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns,labs,loc=0)
+        mp.subplot(212)
+        mp.plot(seasonaldates,seasonalsuzy, 'ro:')
+        mp.ylabel('[km] Height meteor burnout')
+        mp.ylim(70,100)
+        mp.gcf().autofmt_xdate()
+
+    def seasonsplot_height(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
 
         fig,ax1 = mp.subplots()
         ax2 = ax1.twinx()
