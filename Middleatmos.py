@@ -246,7 +246,7 @@ class Middleatmos:
 
         ax1 = mp.subplot(211)
         ax2 = ax1.twinx()
-        l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='suzy')
+        l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='Meteor')
 
         l2 =ax2.plot(OH_dates, OH_temperature,'bo--', label='OH')
 
