@@ -2,8 +2,13 @@ from numpy import *
 import datetime
 import matplotlib.pyplot as mp
 import scipy.stats as stats
+from nrlmsise_00_header import *
+from nrlmsise_00 import *
+
 from scipy import exp, asarray as ar
 from scipy.optimize import curve_fit
+
+
 class Middleatmos:
 
     def readoh(self,filename):
@@ -84,17 +89,27 @@ class Middleatmos:
         susyx_x = zeros(len(Susydat))
         susyy = zeros(len(Susydat))
         susyy_b = zeros(len(Susydat))
+        susy_dofy = zeros(len(Susydat))
+        tempyy = zeros(len(Susydat))
         for i in range(len(Susydat)):
             dtt = int(Susydat[i][0])
             susyx_x[i] = dtt
             dt = str(dtt)
             susyx.append(datetime.datetime.strptime(dt,'%Y%m%d'))
+            d2tt = datetime.datetime.strptime(dt,'%Y%m%d')
+            d2t = int(datetime.date.strftime(d2tt,'%j'))
+            #print(type(d2t))
+            #print(d2t)
+            #d2tt = d2t.timetuple()
+            #d2tt2doy = d2tt.tm_yday()
+            #susy_dofy[i] = d2tt2doy
             Sdata = Susydat[i][1:]
             N = len(Sdata)
             x = ar(linspace(70.0,100.0,N))
             x,y_fit= self.gaussian(Sdata, dtt, i,N, x)
             susyy[i] = x[y_fit.argmax()]
-
+            tempyy[i] = self.amod_nrlmsise_00(d2t,susyy[i])
+            #print (tempyy)
             susyy_b[i] = x[Sdata.argmax()]
             '''
             for j in range(len(Susydat[i][1:])):
@@ -103,4 +118,133 @@ class Middleatmos:
                     x = j+1
                 susyy[i] = x + 70  #susyy is from the height 70-100 km so need to add 69 in order to convert
             '''
-        return susyx_x, susyx, susyy, susyy_b
+            #altitudex = susyy[i]
+
+        return susyx_x, susyx, susyy, susyy_b, tempyy
+
+
+    def amod_nrlmsise_00(self, doy,alt):
+
+        import time
+
+
+        dayofyear = doy
+        altitude = alt
+        output = nrlmsise_output()
+        Input = nrlmsise_input()
+        flags = nrlmsise_flags()
+        aph = ap_array()
+
+        for i in range(7):
+            aph.a[i]=100
+        flags.switches[0] = 0
+        for i in range(1, 24):
+            flags.switches[i]=1
+
+
+        Input.doy=dayofyear;
+        Input.year=0; #/* without effect */
+        Input.sec=3600; # at 1 UTC
+        Input.alt= altitude; # This will vary
+        Input.g_lat=78; # latitude of interest
+        Input.g_long=20; # longitude of interest
+        Input.lst=4; # local standard time
+        Input.f107A=150; #81 day average around date, should be set to 150
+        Input.f107=150; # previous day f10.7, should be set to 150
+        Input.ap=4; #magnetic activity, should be set to 4
+
+
+        #evaluate 0 to 14
+
+        gtd7(Input, flags, output)
+
+
+        #/* output type 1 */
+        '''
+        print('\n', end='')
+        for j in range(9):
+            print('%E ' % output.d[j], end='')
+        print('%E ' % output.t[0], end='')
+        print("\nDAY   ", end='')
+
+        print("         %3i" % Input.doy, end='')
+        print("\nALT   ", end='')
+
+        print("        %4.0f" % Input.alt, end='')
+        print("\nTINF  ", end='')
+
+        print("     %7.2f" % output.t[0], end='')
+        print("\nTG    ", end='')
+
+        print("     %7.2f" % output.t[1], end='')
+        print("\nHE    ", end='')
+
+        print("   %1.3e" % output.d[0], end='')
+        print("\nO     ", end='')
+
+        print("   %1.3e" % output.d[1], end='')
+        print("\nN2    ", end='')
+
+        print("   %1.3e" % output.d[2], end='')
+        print("\nO2    ", end='')
+
+        print("   %1.3e" % output.d[3], end='')
+        print("\nAR    ", end='')
+
+        print("   %1.3e" % output.d[4], end='')
+        print("\nH     ", end='')
+
+        print("   %1.3e" % output.d[6], end='')
+        print("\nN     ", end='')
+
+        print("   %1.3e" % output.d[7], end='')
+        print("\nANM   ", end='')
+
+        print("   %1.3e" % output.d[8], end='')
+        print("\nRHO   ", end='')
+
+        print("   %1.3e" % output.d[5], end='')
+        print('\n')
+        '''
+        return output.t[1]
+
+    def seasons(self,susyx,oh_time,Suzy_data='NO'):
+        '''
+        Sorts out indexes of Suzydata in order to match the season of interest,
+        using the time stamps of the OH seasonal data to find matching times in the Suzy data.
+        Takes
+        Susyx: the time series from Suzydata,
+        oh_time: OH seasonal timeseries
+
+        '''
+        susy_time = susyx
+        suzydata = Suzy_data
+        oh_data = OH_data
+        oh_time = oh_time
+        within = []
+        withininx = []
+        indexcounter = 0
+        for date in susy_time:
+            if oh_time[0] < date <oh_time[-1]:
+                withininx.append(indexcounter)
+                within.append(date)
+            indexcounter += 1
+        print(withininx)
+        print(len(within))
+        if suzydata == 'NO':
+            return within,withininx
+        else:
+            seasonalsuzy = suzydata[withininx]
+            return within,withininx, seasonalsuzy
+
+    def seasonsplot(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
+
+        fig,ax1 = mp.subplots()
+        ax2 = ax1.twinx()
+        l1 = ax1.plot(seasonaldates,seasonalsuzy,'ro', label='suzy')
+
+        l2 =ax2.plot(OH_dates, OH_temperature,'bo')
+        ax1.set_ylim(70,100)
+        fig.autofmt_xdate()
+        ax1.set_ylabel('[Km] Height of maximum meteor burnout')
+        ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')

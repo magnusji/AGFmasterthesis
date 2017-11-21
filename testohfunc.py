@@ -44,7 +44,7 @@ x1415,y1415 = a.sort_oh(OH_data1415)
 x1516,y1516 = a.sort_oh(OH_data1516)
 
 
-susyx_x, susyx,susyy, susyy_b = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
+susyx_x, susyx,susyy, susyy_b, tempyy = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
 
 print(len(susyy_b))
 sigma_yyb = susyy - susyy_b
@@ -53,6 +53,22 @@ mp.plot(susyx, susyy, 'bo', susyx, susyy_b,'r+')
 
 mp.figure()
 mp.plot(susyx, sigma_yyb, 'bo')
+
+mp.figure()
+mp.plot(susyx,tempyy, 'bo')
+mp.ylabel('temperature $^o$K')
+
+
+fig,ax1 = mp.subplots()
+ax2 = ax1.twinx()
+lns1 =ax1.plot(susyx,tempyy,'ro', label='temperature')
+lns2 = ax2.plot(susyx,susyy,'bo', label='Height')
+ax2.set_ylim(80,100)
+fig.autofmt_xdate()
+#mp.savefig('Figures/season0203.png')
+lns = lns1 +lns2
+labs = [l.get_label() for l in lns]
+ax1.legend(lns,labs,loc=0)
 mp.show()
 
 '''

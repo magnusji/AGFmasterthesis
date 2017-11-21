@@ -31,9 +31,9 @@ import time
 from nrlmsise_00_header import *
 from nrlmsise_00 import *
 
-def test_gtd7():
-    output = [nrlmsise_output() for _ in range(17)]
-    Input = [nrlmsise_input() for _ in range(17)]
+def test2_gtd7():
+    output = nrlmsise_output()
+    Input = nrlmsise_input()
     flags = nrlmsise_flags()
     aph = ap_array()
 
@@ -43,58 +43,72 @@ def test_gtd7():
     for i in range(1, 24):
         flags.switches[i]=1
 
-    for i in range(17):
-        Input[i].doy=100;
-        Input[i].year=0; #/* without effect */
-        Input[i].sec=29000;
-        Input[i].alt=400;
-        Input[i].g_lat=78;
-        Input[i].g_long=20;
-        Input[i].lst=16;
-        Input[i].f107A=150;
-        Input[i].f107=150;
-        Input[i].ap=4;
 
-    Input[0].year=2004
-    Input[1].doy=10;
-    Input[2].sec=75000;
-    Input[2].alt=1000;
-    Input[3].alt=100;
-    Input[10].alt=0;
-    Input[11].alt=10;
-    Input[12].alt=30;
-    Input[13].alt=50;
-    Input[14].alt=70;
-    Input[15].alt=90
-    Input[16].alt=100;
-    Input[4].g_lat=0;
-    Input[5].g_long=0;
-    Input[6].lst=4;
-    Input[7].f107A=70;
-    Input[8].f107=180;
-    Input[9].ap=40;
+    Input.doy=10;
+    Input.year=0; #/* without effect */
+    Input.sec=3600; # at 1 UTC
+    Input.alt=80; # This will vary
+    Input.g_lat=78; # latitude of interest
+    Input.g_long=20; # longitude of interest
+    Input.lst=4; # local standard time
+    Input.f107A=150; #81 day average around date, should be set to 150
+    Input.f107=150; # previous day f10.7, should be set to 150
+    Input.ap=4; #magnetic activity, should be set to 4
 
-    Input[15].ap_a = aph
-    Input[16].ap_a = aph
 
     #evaluate 0 to 14
-    for i in range(15):
-        gtd7(Input[i], flags, output[i])
 
-    #/* evaluate 15 and 16 */
-    flags.switches[9] = -1
-    for i in range(15, 17):
-        gtd7(Input[i], flags, output[i])
+    gtd7(Input, flags, output)
+
 
     #/* output type 1 */
-    for i in range(17):
-        print('\n', end='')
-        for j in range(9):
-            print('%E ' % output[i].d[j], end='')
-        print('%E ' % output[i].t[0], end='')
-        print('%E ' % output[i].t[1])
-        #/* DL omitted */
 
+    print('\n', end='')
+    for j in range(9):
+        print('%E ' % output.d[j], end='')
+    print('%E ' % output.t[0], end='')
+    print("\nDAY   ", end='')
+
+    print("         %3i" % Input.doy, end='')
+    print("\nALT   ", end='')
+
+    print("        %4.0f" % Input.alt, end='')
+    print("\nTINF  ", end='')
+
+    print("     %7.2f" % output.t[0], end='')
+    print("\nTG    ", end='')
+
+    print("     %7.2f" % output.t[1], end='')
+    print("\nHE    ", end='')
+
+    print("   %1.3e" % output.d[0], end='')
+    print("\nO     ", end='')
+
+    print("   %1.3e" % output.d[1], end='')
+    print("\nN2    ", end='')
+
+    print("   %1.3e" % output.d[2], end='')
+    print("\nO2    ", end='')
+
+    print("   %1.3e" % output.d[3], end='')
+    print("\nAR    ", end='')
+
+    print("   %1.3e" % output.d[4], end='')
+    print("\nH     ", end='')
+
+    print("   %1.3e" % output.d[6], end='')
+    print("\nN     ", end='')
+
+    print("   %1.3e" % output.d[7], end='')
+    print("\nANM   ", end='')
+
+    print("   %1.3e" % output.d[8], end='')
+    print("\nRHO   ", end='')
+
+    print("   %1.3e" % output.d[5], end='')
+    print('\n')
+        #/* DL omitted */
+'''
     #/* output type 2 */
     for i in range(3):
         print('\n', end='')
@@ -163,10 +177,10 @@ def test_gtd7():
 
 
 
-
+'''
 
 
 if __name__ == '__main__':
     #start = time.clock()
-    test_gtd7()
+    test2_gtd7()
     #print(time.clock() - start)
