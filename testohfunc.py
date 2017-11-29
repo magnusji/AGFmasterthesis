@@ -70,7 +70,97 @@ lns = lns1 +lns2
 labs = [l.get_label() for l in lns]
 ax1.legend(lns,labs,loc=0)
 
+xx = x0304
+yy = y0304
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0304.png',bbox_inches='tight')
 
+xx = x0405
+yy = y0405
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0405.png',bbox_inches='tight')
+
+
+xx = x0506
+yy = y0506
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0506.png',bbox_inches='tight')
+
+xx = x0607
+yy = y0607
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0607.png',bbox_inches='tight')
+
+xx = x0708
+yy = y0708
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0708.png',bbox_inches='tight')
+
+
+xx = x0809
+yy = y0809
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0809.png',bbox_inches='tight')
+
+xx = x0910
+yy = y0910
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season0910.png',bbox_inches='tight')
+
+xx = x1011
+yy = y1011
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season1011.png',bbox_inches='tight')
+
+xx = x1112
+yy = y1112
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season1112.png',bbox_inches='tight')
 
 xx = x1213
 yy = y1213
@@ -80,6 +170,19 @@ print('seasonalindices:')
 print (seasonalindices)
 seasonaltemperature = tempyy[seasonalindices]
 b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season1213.png',bbox_inches='tight')
+
+xx = x1314
+yy = y1314
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+mp.savefig('season1314.png',bbox_inches='tight')
+
+
 
 '''
 number_n = 523  #The number in line with Suzy distributions between 0 and 5313 (-1)

@@ -243,7 +243,7 @@ class Middleatmos:
 
     def seasonsplot_temperature(self,seasonaldates,seasonalsuzy,seasonaltemperature,OH_dates,OH_temperature):
 
-
+        mp.figure()
         ax1 = mp.subplot(211)
         ax2 = ax1.twinx()
         l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='Meteor')
@@ -262,6 +262,7 @@ class Middleatmos:
         mp.ylabel('[km] Height meteor burnout')
         mp.ylim(70,100)
         mp.gcf().autofmt_xdate()
+
 
     def seasonsplot_height(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
 
