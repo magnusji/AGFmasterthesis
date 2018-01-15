@@ -14,7 +14,7 @@ class Middleatmos:
     def readoh(self,filename):
         '''
         This function reads OH data from file to a matrix OH_data
-        needs input filename of OH data
+        Needs input filename of OH data,
         '''
 
         self.filename = filename
@@ -76,7 +76,7 @@ class Middleatmos:
         return x,y_fit #returns x as height and y_fit as the fitted number of occurances
 
 
-    def sort_suzy(self, Suzy_data):
+    def sort_suzy(self, Suzy_data, ap_f107):
         '''
         Sorting the maximum # of meteor burnouts for height
         returns
@@ -84,8 +84,11 @@ class Middleatmos:
             susyx: datetime format of the datetime
             susyy: the maximum height of the fitted curve
             susyy_b: The raw height maximum number of occurances (without fit)
+            tempyy: the temperatures found using the model without the AP an F10.7 data
+            tempyy_ap: the tempersture foung when giving the ap and F10.7 data to the model
         '''
         Susydat = Suzy_data
+        ap_data = ap_f107
         susyx = []
         #x = zeros(len(linesvec))
 
@@ -94,6 +97,7 @@ class Middleatmos:
         susyy_b = zeros(len(Susydat))
         susy_dofy = zeros(len(Susydat))
         tempyy = zeros(len(Susydat))
+        tempyy_ap = zeros(len(Susydat))
         for i in range(len(Susydat)):
             dtt = int(Susydat[i][0])
             susyx_x[i] = dtt
@@ -101,14 +105,35 @@ class Middleatmos:
             susyx.append(datetime.datetime.strptime(dt,'%Y%m%d'))
             d2tt = datetime.datetime.strptime(dt,'%Y%m%d')
             d2t = int(datetime.date.strftime(d2tt,'%j'))
+            year2t = int(datetime.date.strftime(d2tt,'%Y'))
 
+            '''
+            Making a nested loop to find values for Ap and F10.7,
+            for dates corresponding to the given dates for the season
+            '''
+            for j in range(len(ap_data)):
+                if int(ap_data[j][0]) == year2t: # testing for year
+                    if int(ap_data[j][1]) == d2t: # testing for DOY
+                        ap_j = ap_data[j][4] # Daily ap average
+                        f107_j = ap_data[j-1][5] # using F10.7 daily average from previous day
+                        f107_81avg_a = 0
+                        counter_f107 = 0
+                        if j>42 or j<(len(ap_data)-42):
+                            for l in range(j-41 ,j+40): #Finding the 81 day average solar flux F10.7, requires F10.7 data for 42 days before and after wanted date
+                                f107_81avg_a += ap_data[l][5]
+                                counter_f107 += 1
+                                f107_81avg = f107_81avg_a/counter_f107 #The 81 day avg of F10.7
+                        else:
+                            f107_81avg = 150
+                        #print(f107_81avg, counter_f107  ) #checking the calculations
             Sdata = Susydat[i][1:]
             N = len(Sdata)
             x = ar(linspace(70.0,100.0,N))
             x,y_fit= self.gaussian(Sdata, dtt, i,N, x)
             susyy[i] = x[y_fit.argmax()]
-            tempyy[i] = self.amod_nrlmsise_00(d2t,susyy[i])
+            tempyy[i] = self.amod_nrlmsise_00(d2t,susyy[i]) #d2t=DOY, Susyy=altitude
             #print (tempyy)
+            tempyy_ap[i] = self.amod_nrlmsise_00(d2t,susyy[i],ap_j, f107_j,f107_81avg)
             susyy_b[i] = x[Sdata.argmax()]
             '''
             for j in range(len(Susydat[i][1:])):
@@ -119,10 +144,75 @@ class Middleatmos:
             '''
             #altitudex = susyy[i]
 
-        return susyx_x, susyx, susyy, susyy_b, tempyy
+        return susyx_x, susyx, susyy, susyy_b, tempyy, tempyy_ap
 
 
-    def amod_nrlmsise_00(self, doy,alt):
+    def read_kp_ap(self,filename_kp):
+        '''
+        Reads kp and ap data from file Kp_****.dat
+        Not currently in use, due to finding ap data in better format
+        '''
+
+        infile = open(filename_kp,'r')
+        infile.readline()
+        Lines = [line for line in infile]
+        infile.close()
+        N = len(Lines)
+        #print(Lines)
+        print(N)
+        counter = 0
+        kp_data = zeros((N, 19))
+        ap = zeros((N,2))
+        for line in Lines:
+            for char in '+-':
+                line = line.replace(char,' ')
+            words = line.split()
+            numbers = [float(w) for w in words]
+            #print(numbers)
+            for i in range(len(numbers)):
+                kp_data[counter][i] = numbers[i]
+            ap[counter][0] = kp_data[counter][0]
+            ap[counter][1] = kp_data[counter][-1]
+            counter += 1
+        print(kp_data[1][-1])
+        #print('ap')
+        print(ap)
+
+    def omniread(self,filename):
+        '''
+        Reads file lst gotten from omniweb NASA, this file has specification
+
+          FORMAT OF THE SUBSETTED FILE
+
+            ITEMS                      FORMAT
+
+         1 YEAR                          I4
+         2 DOY                           I4
+         3 Hour                          I3
+         4 Scalar B, nT                  F6.1
+         5 ap_index, nT                  I4
+         6 f10.7_index                   F6.1
+
+        This file was produced by SPDF OMNIWeb Plus service
+
+        Sorts the different columns in the matrix omnimtx for further use
+        '''
+        infile = open(filename)
+        lines = [line for line in infile]
+        infile.close()
+
+        omnimtx = zeros((len(lines),6))
+        counter = 0
+        for line in lines:
+            wordstr = line.split()
+            numbers = [float(w) for w in wordstr]
+            for i in range(len(numbers)):
+                omnimtx[counter][i] = numbers[i]
+            counter += 1
+        return omnimtx
+
+
+    def amod_nrlmsise_00(self, doy,alt, ap=4.0, f107=150,f107A=150):
 
         import time
 
@@ -148,63 +238,15 @@ class Middleatmos:
         Input.g_lat=78; # latitude of interest
         Input.g_long=20; # longitude of interest
         Input.lst=4; # local standard time
-        Input.f107A=150; #81 day average around date, should be set to 150
-        Input.f107=150; # previous day f10.7, should be set to 150
-        Input.ap=4; #magnetic activity, should be set to 4
+        Input.f107A=f107A; #81 day average around date, should be set to 150
+        Input.f107=f107; # previous day f10.7, should be set to 150
+        Input.ap= ap; #magnetic activity, should be set to 4
 
 
         #evaluate 0 to 14
 
         gtd7(Input, flags, output)
 
-
-        #/* output type 1 */
-        '''
-        print('\n', end='')
-        for j in range(9):
-            print('%E ' % output.d[j], end='')
-        print('%E ' % output.t[0], end='')
-        print("\nDAY   ", end='')
-
-        print("         %3i" % Input.doy, end='')
-        print("\nALT   ", end='')
-
-        print("        %4.0f" % Input.alt, end='')
-        print("\nTINF  ", end='')
-
-        print("     %7.2f" % output.t[0], end='')
-        print("\nTG    ", end='')
-
-        print("     %7.2f" % output.t[1], end='')
-        print("\nHE    ", end='')
-
-        print("   %1.3e" % output.d[0], end='')
-        print("\nO     ", end='')
-
-        print("   %1.3e" % output.d[1], end='')
-        print("\nN2    ", end='')
-
-        print("   %1.3e" % output.d[2], end='')
-        print("\nO2    ", end='')
-
-        print("   %1.3e" % output.d[3], end='')
-        print("\nAR    ", end='')
-
-        print("   %1.3e" % output.d[4], end='')
-        print("\nH     ", end='')
-
-        print("   %1.3e" % output.d[6], end='')
-        print("\nN     ", end='')
-
-        print("   %1.3e" % output.d[7], end='')
-        print("\nANM   ", end='')
-
-        print("   %1.3e" % output.d[8], end='')
-        print("\nRHO   ", end='')
-
-        print("   %1.3e" % output.d[5], end='')
-        print('\n')
-        '''
         return output.t[1]
 
     def seasons(self,susyx,oh_time,Suzy_data='NO'):
@@ -263,6 +305,29 @@ class Middleatmos:
         mp.ylim(70,100)
         mp.gcf().autofmt_xdate()
 
+    def seasonsplot_temperature_ap(self,seasonaldates,seasonalsuzy,seasonaltemperature,seasonaltemperature_ap,OH_dates,OH_temperature):
+
+        mp.figure()
+        ax1 = mp.subplot(211)
+        ax2 = ax1.twinx()
+        l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='Meteor')
+
+        l2 =ax2.plot(OH_dates, OH_temperature,'bo--', label='OH')
+        l3 = ax1.plot(seasonaldates,seasonaltemperature_ap, 'go:', label='Meteor_AP')
+
+        ax1.set_ylabel('[$^o$K] Temperature at maximum meteor burnout')
+        #ax1.set_ylim(210,235)
+        ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
+        #ax2.set_ylim(170,250)
+        lns = l1 +l2 + l3
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns,labs,loc=(1.04,1))
+        mp.subplot(212)
+        mp.plot(seasonaldates,seasonalsuzy, 'ro:')
+        mp.ylabel('[km] Height meteor burnout')
+        mp.ylim(70,100)
+        mp.gcf().autofmt_xdate()
+
 
     def seasonsplot_height(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
 
@@ -275,3 +340,63 @@ class Middleatmos:
         fig.autofmt_xdate()
         ax1.set_ylabel('[Km] Height of maximum meteor burnout')
         ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
+
+        return linesvec
+
+
+class Read_four_lines:
+
+    def read_suzy(self,filename):
+        infile = open(filename,'r')
+        lines = [line for line in infile]
+        infile.close()
+        lines2 = []
+        count = 0
+        rownumberlines = int(len(lines)/4)
+        linesvec = zeros((rownumberlines, 32))
+        count2 = 0
+
+        for line in lines:
+            number_str = line.split()
+            numbers = [float(w) for w in number_str]
+            if numbers[0] > 10000:
+                count2 = 0
+                for i in range(len(numbers)):
+                    linesvec[count][count2] = numbers[i]
+                    count2 += 1
+                count += 1
+            else:
+                for i in range(len(numbers)):
+                    linesvec[count-1][count2] = numbers[i]
+                    count2 += 1
+        return linesvec
+
+    def read_oh(self,filename):
+        infile = open(filename, 'r')
+        lines =[line for line in infile]
+        OH_data = zeros((len(lines),8))
+        counter = 0
+        for line in lines:
+            words = line.split()
+            numbers = [float(w) for w in words]
+            for i in range(len(numbers)):
+                OH_data[counter][i] = numbers[i]
+            counter += 1
+        return OH_data
+
+    def sort_oh(self, OH_data):
+        OH_data = OH_data
+        x = []
+        #x = zeros(len(OH_data))
+        y = zeros(len(OH_data))
+
+        for i in range(len(OH_data)):
+            dy = int(OH_data[i][0])
+            dm = int(OH_data[i][1])
+            dd = int(OH_data[i][2])
+            dt = datetime.datetime(dy, dm, dd)
+            x.append(dt)
+            #x[i] = OH_data[i][0] #needs to get format yyyymmdd
+            y[i] = OH_data[i][4]
+
+        return x,y

@@ -2,13 +2,13 @@ from numpy import *
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as mp
 import datetime
-import Read_four_lines as Rf
+#import Read_four_lines as Rf
 import Middleatmos
 import scipy.stats as stats
 from scipy import exp, asarray as ar
 
 
-a = Rf.Read_four_lines()
+a = Middleatmos.Read_four_lines()
 b = Middleatmos.Middleatmos()
 
 OH_data0203 = a.read_oh('daily_OHtemp_0203_mies.dat')
@@ -43,11 +43,12 @@ x1314,y1314 = a.sort_oh(OH_data1314)
 x1415,y1415 = a.sort_oh(OH_data1415)
 x1516,y1516 = a.sort_oh(OH_data1516)
 
-
-susyx_x, susyx,susyy, susyy_b, tempyy = b.sort_suzy(Susydat) # dist data + number between 1 and 31 for height profile
+omniread_data = b.omniread('omni2_daily_25800.lst')
+susyx_x, susyx,susyy, susyy_b, tempyy,tempyy_ap = b.sort_suzy(Susydat, omniread_data) # dist data + number between 1 and 31 for height profile
 
 #print(len(susyy_b))
 sigma_yyb = susyy - susyy_b
+'''
 mp.figure()
 mp.plot(susyx, susyy, 'bo', susyx, susyy_b,'r+')
 
@@ -57,19 +58,24 @@ mp.plot(susyx, sigma_yyb, 'bo')
 mp.figure()
 mp.plot(susyx,tempyy, 'bo')
 mp.ylabel('temperature $^o$K')
-
-
+'''
+'''
 fig,ax1 = mp.subplots()
 ax2 = ax1.twinx()
-lns1 =ax1.plot(susyx,tempyy,'ro', label='temperature')
+lns1 =ax1.plot(susyx,tempyy_ap,'ro', label='temperature_ap')
 lns2 = ax2.plot(susyx,susyy,'bo', label='Height')
+lns3 = ax1.plot(susyx,tempyy_ap,'g*',label='temperature')
 ax2.set_ylim(80,100)
 fig.autofmt_xdate()
 #mp.savefig('Figures/season0203.png')
-lns = lns1 +lns2
+lns = lns1 +lns2 + lns3
 labs = [l.get_label() for l in lns]
 ax1.legend(lns,labs,loc=0)
+'''
 
+
+
+'''
 xx = x0304
 yy = y0304
 seasonaldates, seasonalindices = b.seasons(susyx,xx)
@@ -171,7 +177,7 @@ print (seasonalindices)
 seasonaltemperature = tempyy[seasonalindices]
 b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
 mp.savefig('season1213.png',bbox_inches='tight')
-
+'''
 xx = x1314
 yy = y1314
 seasonaldates, seasonalindices = b.seasons(susyx,xx)
@@ -179,11 +185,37 @@ print('\n', end='')
 print('seasonalindices:')
 print (seasonalindices)
 seasonaltemperature = tempyy[seasonalindices]
-b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
-mp.savefig('season1314.png',bbox_inches='tight')
+seasonaltemp_ap = tempyy_ap[seasonalindices]
+b.seasonsplot_temperature_ap(seasonaldates,susyy[seasonalindices],seasonaltemperature,seasonaltemp_ap,xx,yy)
+mp.savefig('season1314_ap.png',bbox_inches='tight')
+
+xx = x1415
+yy = y1415
+seasonaldates, seasonalindices = b.seasons(susyx,xx)
+print('\n', end='')
+print('seasonalindices:')
+print (seasonalindices)
+seasonaltemperature = tempyy[seasonalindices]
+
+#b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemperature,xx,yy)
+#b.seasonsplot_temperature(seasonaldates,susyy[seasonalindices],seasonaltemp_ap,xx,yy)
+#mp.savefig('season1415.png',bbox_inches='tight')
+seasonaltemp_ap = tempyy_ap[seasonalindices]
+b.seasonsplot_temperature_ap(seasonaldates,susyy[seasonalindices],seasonaltemperature,seasonaltemp_ap,xx,yy)
+mp.savefig('season1415_ap.png',bbox_inches='tight')
+
+mp.figure()
+mp.plot(seasonaldates,seasonaltemperature,'bo', label='without ap')
+mp.hold('on')
+mp.plot(seasonaldates,seasonaltemp_ap,'ro', label='with ap&f107')
+mp.title('Temperature comparison')
+mp.legend()
+mp.hold('off')
 
 
-
+mp.figure()
+mp.plot(susyy,tempyy,'ro')
+mp.title('Height vs temperature from model')
 '''
 number_n = 523  #The number in line with Suzy distributions between 0 and 5313 (-1)
 Sdata = Susydat[number_n][1:]
