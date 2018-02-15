@@ -8,8 +8,69 @@ from nrlmsise_00 import *
 from scipy import exp, asarray as ar
 from scipy.optimize import curve_fit
 
+class Read_four_lines:
 
-class Middleatmos:
+    def read_suzy(self,filename):
+        '''
+        Reading radar data from a filename "distribution_ht.txt"
+        and returnig them in the form of a matrix linesvec
+        '''
+        infile = open(filename,'r')
+        lines = [line for line in infile]
+        infile.close()
+        lines2 = []
+        count = 0
+        rownumberlines = int(len(lines)/4)
+        linesvec = zeros((rownumberlines, 32))
+        count2 = 0
+
+        for line in lines:
+            number_str = line.split()
+            numbers = [float(w) for w in number_str]
+            if numbers[0] > 10000: #this ensures that the first column starts with a date
+                count2 = 0
+                for i in range(len(numbers)):
+                    linesvec[count][count2] = numbers[i]
+                    count2 += 1
+                count += 1
+            else: #The other lines that are not starting with a date is then added in the previous column
+                for i in range(len(numbers)):
+                    linesvec[count-1][count2] = numbers[i]
+                    count2 += 1
+        return linesvec
+
+    def read_oh(self,filename):
+        infile = open(filename, 'r')
+        lines =[line for line in infile]
+        OH_data = zeros((len(lines),8))
+        counter = 0
+        for line in lines:
+            words = line.split()
+            numbers = [float(w) for w in words]
+            for i in range(len(numbers)):
+                OH_data[counter][i] = numbers[i]
+            counter += 1
+        return OH_data
+
+    def sort_oh(self, OH_data):
+        OH_data = OH_data
+        x = []
+        #x = zeros(len(OH_data))
+        y = zeros(len(OH_data))
+
+        for i in range(len(OH_data)):
+            dy = int(OH_data[i][0])
+            dm = int(OH_data[i][1])
+            dd = int(OH_data[i][2])
+            dt = datetime.datetime(dy, dm, dd)
+            x.append(dt)
+            #x[i] = OH_data[i][0] #needs to get format yyyymmdd
+            y[i] = OH_data[i][4]
+
+        return x,y
+
+
+class Middleatmos(Read_four_lines):
 
     def readoh(self,filename):
         '''
@@ -305,9 +366,11 @@ class Middleatmos:
         mp.ylim(70,100)
         mp.gcf().autofmt_xdate()
 
-    def seasonsplot_temperature_ap(self,seasonaldates,seasonalsuzy,seasonaltemperature,seasonaltemperature_ap,OH_dates,OH_temperature):
+    def seasonsplot_temperature_ap(self,seasonaldates,seasonalsuzy,seasonaltemperature,seasonaltemperature_ap,OH_dates,OH_temperature, title='Title'):
 
+        Title = str(title)
         mp.figure()
+
         ax1 = mp.subplot(211)
         ax2 = ax1.twinx()
         l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='Meteor')
@@ -321,12 +384,15 @@ class Middleatmos:
         #ax2.set_ylim(170,250)
         lns = l1 +l2 + l3
         labs = [l.get_label() for l in lns]
-        ax1.legend(lns,labs,loc=(1.04,1))
+        ax1.legend(lns,labs,bbox_to_anchor=(1.12,0.5), loc='center left', borderaxespad=0)
+        mp.title(Title)
         mp.subplot(212)
         mp.plot(seasonaldates,seasonalsuzy, 'ro:')
         mp.ylabel('[km] Height meteor burnout')
         mp.ylim(70,100)
         mp.gcf().autofmt_xdate()
+
+
 
 
     def seasonsplot_height(self,seasonaldates,seasonalsuzy,OH_dates,OH_temperature):
@@ -343,60 +409,27 @@ class Middleatmos:
 
         return linesvec
 
+    def date_height_temperature(self,oh_time,suzytime):
 
-class Read_four_lines:
+        susy_time = suzytime
 
-    def read_suzy(self,filename):
-        infile = open(filename,'r')
-        lines = [line for line in infile]
-        infile.close()
-        lines2 = []
-        count = 0
-        rownumberlines = int(len(lines)/4)
-        linesvec = zeros((rownumberlines, 32))
-        count2 = 0
+        oh_time = oh_time
+        matchingdatesOH=[]
+        matchingdatesOH_indices = []
+        matchingdatesRad=[]
+        matchingdatesRad_indices = []
+        indexcounter = 0
+        for date in susy_time:
+            indexcounter2 = 0
+            for date2 in oh_time:
+                if date==date2:
+                    matchingdatesRad_indices.append(indexcounter)
+                    matchingdatesRad.append(date)
+                    matchingdatesOH_indices.append(indexcounter2)
+                    matchingdatesOH.append(date2)
+                indexcounter2 +=1
+            indexcounter += 1
+        #print(withininx)
+        #print(len(within))
 
-        for line in lines:
-            number_str = line.split()
-            numbers = [float(w) for w in number_str]
-            if numbers[0] > 10000:
-                count2 = 0
-                for i in range(len(numbers)):
-                    linesvec[count][count2] = numbers[i]
-                    count2 += 1
-                count += 1
-            else:
-                for i in range(len(numbers)):
-                    linesvec[count-1][count2] = numbers[i]
-                    count2 += 1
-        return linesvec
-
-    def read_oh(self,filename):
-        infile = open(filename, 'r')
-        lines =[line for line in infile]
-        OH_data = zeros((len(lines),8))
-        counter = 0
-        for line in lines:
-            words = line.split()
-            numbers = [float(w) for w in words]
-            for i in range(len(numbers)):
-                OH_data[counter][i] = numbers[i]
-            counter += 1
-        return OH_data
-
-    def sort_oh(self, OH_data):
-        OH_data = OH_data
-        x = []
-        #x = zeros(len(OH_data))
-        y = zeros(len(OH_data))
-
-        for i in range(len(OH_data)):
-            dy = int(OH_data[i][0])
-            dm = int(OH_data[i][1])
-            dd = int(OH_data[i][2])
-            dt = datetime.datetime(dy, dm, dd)
-            x.append(dt)
-            #x[i] = OH_data[i][0] #needs to get format yyyymmdd
-            y[i] = OH_data[i][4]
-
-        return x,y
+        return matchingdatesOH, matchingdatesOH_indices,matchingdatesRad, matchingdatesRad_indices
