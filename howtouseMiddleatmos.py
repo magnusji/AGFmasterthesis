@@ -36,10 +36,10 @@ print(matchDatesOH[3],matchDatesR[3])
 print(matchDatesOH[4],matchDatesR[4])
 
 seasonalheight = susyy[MatchR]
-seasonaltempOH = yy[MatchOH]
-
+seasonaltempOH1314 = yy[MatchOH]
+seasonaltempR1314 = tempyy_ap[MatchR]
 mp.figure()
-mp.plot(seasonaltempOH,seasonalheight, 'ko', label='1314')
+mp.plot(seasonaltempOH1314,seasonalheight, 'ko', label='1314')
 mp.hold('on')
 mp.xlabel('Temperature')
 mp.ylabel('Height')
@@ -47,27 +47,49 @@ OH_data = Mread.read_oh('daily_OHtemp_1415_mies.dat')
 xx,yy = Mread.sort_oh(OH_data)
 matchDatesOH,MatchOH,matchDatesR, MatchR = Matmos.date_height_temperature(xx,susyx)
 seasonalheight = susyy[MatchR]
-seasonaltempOH = yy[MatchOH]
-mp.plot(seasonaltempOH,seasonalheight, 'ro', label='1415')
+seasonaltempOH1415 = yy[MatchOH]
+seasonaltempR1415 = tempyy_ap[MatchR]
+mp.plot(seasonaltempOH1415,seasonalheight, 'ro', label='1415')
 OH_data = Mread.read_oh('daily_OHtemp_1213_mies.dat')
 xx,yy = Mread.sort_oh(OH_data)
 matchDatesOH,MatchOH,matchDatesR, MatchR = Matmos.date_height_temperature(xx,susyx)
 seasonalheight = susyy[MatchR]
-seasonaltempOH = yy[MatchOH]
-mp.plot(seasonaltempOH,seasonalheight, 'go',label='1213')
+seasonaltempOH1213 = yy[MatchOH]
+seasonaltempR1213 = tempyy_ap[MatchR]
+mp.plot(seasonaltempOH1213,seasonalheight, 'go',label='1213')
 OH_data = Mread.read_oh('daily_OHtemp_1112_mies.dat')
 xx,yy = Mread.sort_oh(OH_data)
 matchDatesOH,MatchOH,matchDatesR, MatchR = Matmos.date_height_temperature(xx,susyx)
 seasonalheight = susyy[MatchR]
-seasonaltempOH = yy[MatchOH]
-mp.plot(seasonaltempOH,seasonalheight, 'bo',label='1112')
+seasonaltempR1112 = tempyy_ap[MatchR]
+seasonaltempOH1112 = yy[MatchOH]
+mp.plot(seasonaltempOH1112,seasonalheight, 'bo',label='1112')
 OH_data = Mread.read_oh('daily_OHtemp_1011_mies.dat')
 xx,yy = Mread.sort_oh(OH_data)
 matchDatesOH,MatchOH,matchDatesR, MatchR = Matmos.date_height_temperature(xx,susyx)
 seasonalheight = susyy[MatchR]
-seasonaltempOH = yy[MatchOH]
-mp.plot(seasonaltempOH,seasonalheight, 'co',label='1011')
+seasonaltempR1011 = tempyy_ap[MatchR]
+seasonaltempOH1011 = yy[MatchOH]
+R1011,P1011 = stats.pearsonr(asarray(seasonaltempR1011), asarray(seasonaltempOH1011))
+print(R1011, P1011)
+R1112,P1112 = stats.pearsonr(asarray(seasonaltempR1112), asarray(seasonaltempOH1112))
+R1213,P1213 = stats.pearsonr(asarray(seasonaltempR1213), asarray(seasonaltempOH1213))
+R1314,P1314 = stats.pearsonr(asarray(seasonaltempR1314), asarray(seasonaltempOH1314))
+R1415,P1415 = stats.pearsonr(asarray(seasonaltempR1415), asarray(seasonaltempOH1415))
+mp.plot(seasonaltempOH1011,seasonalheight, 'co',label='1011')
 mp.legend(bbox_to_anchor=(0.2,0.5), loc='center left', borderaxespad=0)
 mp.hold('off')
 mp.savefig('Figures_ap/heightvsOHtemp.png',bbox_inches='tight')
+mp.figure()
+mp.hold('on')
+mp.plot(seasonaltempR1011,seasonaltempOH1011, 'co', label='1011, R=%.2f '%R1011)
+mp.plot(seasonaltempR1112,seasonaltempOH1112, 'bo', label='1112, R=%.2f '%R1112)
+mp.plot(seasonaltempR1213,seasonaltempOH1213, 'go', label='1213, R=%.2f'%R1213)
+mp.plot(seasonaltempR1314,seasonaltempOH1314, 'ko', label='1314, R=%.2f'%R1314)
+mp.plot(seasonaltempR1415,seasonaltempOH1415, 'ro', label='1415, R=%.2f'%R1415)
+mp.legend()
+mp.xlabel('Meteor Temperature [K]')
+mp.ylabel('OH Temperature [K]')
+mp.hold('off')
+mp.savefig('Figures_ap/meterotempvohtemp.png',bbox_inches='tight')
 mp.show()
