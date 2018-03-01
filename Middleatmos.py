@@ -373,16 +373,16 @@ class Middleatmos(Read_four_lines):
 
         ax1 = mp.subplot(211)
         ax2 = ax1.twinx()
-        l1 = ax1.plot(seasonaldates,seasonaltemperature,'ro:', label='Meteor')
+        #l1 = ax1.plot(seasonaldates,seasonaltemperature,'go:', label='Meteor')
 
         l2 =ax2.plot(OH_dates, OH_temperature,'bo--', label='OH')
-        l3 = ax1.plot(seasonaldates,seasonaltemperature_ap, 'go:', label='Meteor_AP')
+        l3 = ax1.plot(seasonaldates,seasonaltemperature_ap, 'ro:', label='Meteor_AP')
 
         ax1.set_ylabel('[$^o$K] Temperature at maximum meteor burnout')
         #ax1.set_ylim(210,235)
         ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
         #ax2.set_ylim(170,250)
-        lns = l1 +l2 + l3
+        lns = l2 + l3
         labs = [l.get_label() for l in lns]
         ax1.legend(lns,labs,bbox_to_anchor=(1.12,0.5), loc='center left', borderaxespad=0)
         mp.title(Title)

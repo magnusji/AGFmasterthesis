@@ -10,7 +10,7 @@ from scipy import exp, asarray as ar
 Matmos = Middleatmos.Middleatmos()
 Mread = Middleatmos.Read_four_lines()
 
-OH_data = Mread.read_oh('daily_OHtemp_1314_mies.dat')
+OH_data = Mread.read_oh('daily_OHtemp_1213_mies.dat')
 Susydat = Mread.read_suzy('distribution_ht.txt')
 xx,yy = Mread.sort_oh(OH_data)
 
@@ -23,11 +23,29 @@ seasonaldates, seasonalindices = Matmos.seasons(susyx,xx)
 seasonaltemperature = tempyy[seasonalindices]
 seasonaltemp_ap = tempyy_ap[seasonalindices]
 Matmos.seasonsplot_temperature_ap(seasonaldates,susyy[seasonalindices],\
-seasonaltemperature,seasonaltemp_ap,xx,yy,title='Season 2013-2014')
-#mp.savefig('Figures_ap/season1314_ap.png',bbox_inches='tight')
+seasonaltemperature,seasonaltemp_ap,xx,yy,title='Season 2012-2013')
+mp.savefig('Figures_ap/season1213_ap.png',bbox_inches='tight')
 #mp.figure()
 #mp.plot(susyy[seasonalindices], seasonaltemp_ap, 'ko')
 
+def seasonalplots(FilenameOH, title='title', figurename='nameforsaving'):
+    OH_data = Mread.read_oh(FilenameOH)
+    xx,yy = Mread.sort_oh(OH_data)
+    seasonaldates, seasonalindices = Matmos.seasons(susyx,xx)
+    seasonaltemperature = tempyy[seasonalindices]
+    seasonaltemp_ap = tempyy_ap[seasonalindices]
+    Matmos.seasonsplot_temperature_ap(seasonaldates,susyy[seasonalindices],\
+    seasonaltemperature,seasonaltemp_ap,xx,yy,title=title)
+    mp.savefig(figurename,bbox_inches='tight')
+
+seasonalplots('daily_OHtemp_0809_mies.dat', title='Season 2008-2009', figurename='Figures_ap/season0809_ap.png')
+seasonalplots('daily_OHtemp_1011_mies.dat', title='Season 2010-2011', figurename='Figures_ap/season1011_ap.png')
+seasonalplots('daily_OHtemp_1112_mies.dat', title='Season 2011-2012', figurename='Figures_ap/season1112_ap.png')
+seasonalplots('daily_OHtemp_1213_mies.dat', title='Season 2012-2013', figurename='Figures_ap/season1213_ap.png')
+seasonalplots('daily_OHtemp_1314_mies.dat', title='Season 2013-2014', figurename='Figures_ap/season1314_ap.png')
+seasonalplots('daily_OHtemp_1415_mies.dat', title='Season 2014-2015', figurename='Figures_ap/season1415_ap.png')
+
+'''
 matchDatesOH,MatchOH,matchDatesR, MatchR = Matmos.date_height_temperature(xx,susyx)
 print(matchDatesOH[0],matchDatesR[0])
 print(matchDatesOH[1],matchDatesR[1])
@@ -92,4 +110,5 @@ mp.xlabel('Meteor Temperature [K]')
 mp.ylabel('OH Temperature [K]')
 mp.hold('off')
 mp.savefig('Figures_ap/meterotempvohtemp.png',bbox_inches='tight')
+'''
 mp.show()
