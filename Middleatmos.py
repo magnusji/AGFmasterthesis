@@ -4,6 +4,7 @@ import matplotlib.pyplot as mp
 import scipy.stats as stats
 from nrlmsise_00_header import *
 from nrlmsise_00 import *
+from matplotlib.dates import MonthLocator, YearLocator, WeekdayLocator
 
 from scipy import exp, asarray as ar
 from scipy.optimize import curve_fit
@@ -40,6 +41,13 @@ class Read_four_lines:
         return linesvec
 
     def read_oh(self,filename):
+        '''
+
+        Reads data for OH data set with filename daily_OHtemp_xxxx_mies.dat
+        Where xxxx is the season (ex: 1213),
+        the two first digits is the first year and the two last is the second year
+        '''
+
         infile = open(filename, 'r')
         lines =[line for line in infile]
         OH_data = zeros((len(lines),8))
@@ -76,6 +84,10 @@ class Middleatmos(Read_four_lines):
         '''
         This function reads OH data from file to a matrix OH_data
         Needs input filename of OH data,
+        Reads data for OH data set with filename daily_OHtemp_xxxx_mies.dat
+        Where xxxx is the season (ex: 1213),
+        the two first digits is the first year and the two last is the second year
+        (duplicate exist in Read_four_lines)
         '''
 
         self.filename = filename
@@ -378,19 +390,32 @@ class Middleatmos(Read_four_lines):
         l2 =ax2.plot(OH_dates, OH_temperature,'bo--', label='OH')
         l3 = ax1.plot(seasonaldates,seasonaltemperature_ap, 'ro:', label='Meteor_AP')
 
-        ax1.set_ylabel('[$^o$K] Temperature at maximum meteor burnout')
+        ax1.set_ylabel('[$^o$K] Temperature Meteor')
         #ax1.set_ylim(210,235)
-        ax2.set_ylabel('[$^o$K] Temperature of OH-airglow')
+        ax2.set_ylabel('[$^o$K] Temperature OH-airglow')
         #ax2.set_ylim(170,250)
         lns = l2 + l3
         labs = [l.get_label() for l in lns]
-        ax1.legend(lns,labs,bbox_to_anchor=(1.12,0.5), loc='center left', borderaxespad=0)
+        ax1.legend(lns,labs,bbox_to_anchor=(0.7,1.20), loc='center left', borderaxespad=0)
         mp.title(Title)
-        mp.subplot(212)
-        mp.plot(seasonaldates,seasonalsuzy, 'ro:')
-        mp.ylabel('[km] Height meteor burnout')
-        mp.ylim(70,100)
         mp.gcf().autofmt_xdate()
+        wloc = WeekdayLocator(byweekday=1)
+        mloc = MonthLocator()
+        ax1.xaxis.set_major_locator(mloc)
+        ax1.xaxis.set_minor_locator(wloc)
+        ax1.grid(True, which='major', linestyle='-', alpha=0.5 )
+        ax1.grid(True, which='minor', linestyle='--', alpha=0.2)
+
+        ax3 = mp.subplot(212,  sharex=ax1)
+        mp.plot(seasonaldates,seasonalsuzy, 'ro:')
+        ymin = 85 #min(seasonalsuzy)
+        ymax = 95 #max(seasonalsuzy)
+        mp.ylabel('[km] Height Meteor')
+        mp.ylim(ymin,ymax)
+        mp.setp(ax3.get_xticklabels(), visible=True)
+        mp.gcf().autofmt_xdate()
+        ax3.grid(True, which='major', linestyle='-', alpha=0.5 )
+        ax3.grid(True, which='minor', linestyle='--', alpha=0.2)
 
 
 
